@@ -41,7 +41,10 @@ INSTALLED_APPS = [
     'core.apps.CoreConfig',
     'services.apps.ServicesConfig',
     'blog.apps.BlogConfig',
-    'social.apps.SocialConfig'
+    'social.apps.SocialConfig',
+    'pages.apps.PagesConfig',
+    'ckeditor',
+    'contact.apps.ContactConfig'
 ]
 
 MIDDLEWARE = [
@@ -67,6 +70,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'social.processors.ctx_link'
             ],
         },
     },
@@ -130,3 +134,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Media files
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+
+# Ckeditor
+CKEDITOR_CONFIGS = {
+    'default': {
+        'toolbar': 'Basic'
+    }
+}
