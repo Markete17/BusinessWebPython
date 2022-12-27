@@ -5,4 +5,13 @@ from .models import Link
 class LinkAdmin(admin.ModelAdmin):
     readonly_fields = ('created', 'updated')
 
+    def get_readonly_fields(self, request, object=None):
+        if request.user.groups.filter(name="Personal").exists():
+            return ('key', 'name')
+        else:
+            return ('created', 'updated')
+    
+    def get_exclude(self, request, object=None):
+        return ('key',)
+
 admin.site.register(Link,LinkAdmin)

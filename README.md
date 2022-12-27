@@ -12,6 +12,8 @@ Toda la información en: [Información](https://docs.hektorprofe.net/django/web-
 7. [URL del panel de administrador en las vistas](#id7)
 8. [Ck Editor](#id8)
 9. [Formularios y validaciones](#id9)
+10. [Enviar email con MailTrap y la libreria django.core.mail EmailMessage](#id10)
+11. [Grupos y roles panel de administrador](#id11)
 
 ## Personalizar panel Administrador<a name="id1"></a>
 
@@ -282,4 +284,178 @@ def contact(request):
 4. Añadir el form a la vista
 
 Con la variable nombrada: {{form.as_table}} y se le puede dar formato as_ table, ul, p etc.
-              
+Django no pone por defecto el botón de enviar, es necesario también añadirlo.
+
+5. Añadir CSRF
+Falsificación de información en sitios cruzados. Es decir, este token lo que hace es protegernos ante falisificación de solicitudes desde otros sitios.
+Permite que nuestra app se asegure que el origen de las peticiones vengan desde nuestro dominio y no desde otras páginas maliciosas.
+
+<pre><code>
+              <!-- Formulario de contacto -->
+              <form action='' method='POST'>
+              <table>
+               {% csrf_token %}
+              {{form.as_table}}
+              </table>
+              <input type="submit" value="Enviar"/>
+              </form>
+              <!-- Fin formulario de contacto -->
+</code></pre>
+
+6. Implementar la vista.
+
+Con el método <b>request.method</b> se puede ver el tipo de petición que es si es request.method == GET (cuando se obtiene la página del formulario) o 
+si request.method == POST (cuando se envían los datos del formulario.
+
+Con el método <b>form.isvalid()</b> se puede comprobar si los datos enviados son correctos.
+El método <b>request.POST</b> es un diccionario con todos los datos del formulario enviados.
+Con <b>reverse</b> lo que permite es detectar la URL que tiene el name en las urls.py. Esto es por si cambia en algún momento la URL, para hacerlo dinámico.
+
+<pre><code>
+def contact(request):
+    contact_form = ContactForm()
+    if request.method == 'POST':
+        contact_form = ContactForm(data = request.POST)
+        if contact_form.is_valid():
+            name = request.POST['name']
+            email = request.POST['email']
+            contact = request.POST['contact']
+            return redirect(reverse('contact')+'?ok')
+    return render(request, 'contact/contact.html',{'form': contact_form})
+	
+</code></pre>
+
+7. Recibir el ok en el template.
+Si todo es correcto, se redireccionará a la URL de 'contact' y en el diccionario de request.GET se almacenará la query OK.
+Por lo tanto, se podrá poner un mensaje de que todo ha ido correctamente.
+
+### Diseñar un formulario con diseño propio
+
+En vez de hacer que django genere automáticamente el formulario, hacerlo nosotros.
+
+[Link Formularios a mano](https://docs.djangoproject.com/en/4.0/topics/forms/#rendering-fields-manually)
+
+1. Al pasar a la vista el formulario, en la template se generan variables que pueden ser usadas como inputs, {{form.name}}, {{form.email}}
+2. El problema que estos no tienen una clase CSS o bootstrap para verse como en el frontend, para ello, se tiene que modificar el formulario
+en forms.py y agregar el parámetro <b>widget</b>. A este widget hay que pasarle de la biblioteca forms el forms.TextInput y dentro unos atributos que
+son los atributos que se pueden poner en los HTML como class, placeholder, rows, cols, value, etc.
+
+<pre><code>
+class ContactForm(forms.Form):
+    name = forms.CharField(label="Nombre", required=True, widget=forms.TextInput(
+        attrs={'class': 'form-control', 'placeholder': 'Escribe tu nombre'}
+    ), min_length=3, max_length=100)
+    email = forms.EmailField(label="Email", required=True, widget=forms.EmailInput(
+        attrs={'class': 'form-control', 'placeholder': 'Escribe tu email'}
+    ), min_length=3, max_length=100)
+    content = forms.CharField(label="Contenido", required=True, widget=forms.Textarea(
+        attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Escribe tu mensaje'}
+    ), min_length=3, max_length=1000)
+</code></pre>
+
+3. Entonces la vista quedaría de la siguiente forma añadiendo también {{form.name.errors}}
+
+<pre><code>
+<form method='POST' action=''>
+                  {% csrf_token %}
+                  <div class="form-group">
+                      <label>Nombre *</label>
+                      <div class="input-group">
+                        {{form.name}}
+                      </div>
+                        {{form.name.errors}}
+                  </div>
+                  <div class="form-group">
+                      <label>Email *</label>
+                      <div class="input-group">
+                          {{form.email}}
+                      </div>
+                      {{form.email.errors}}
+                      <!--<ul class="errorlist">
+                          <li>El email no es correcto.</li>
+                      </ul>
+                      -->
+                  </div>
+                  <div class="form-group">
+                      <label>Mensaje *</label>
+                      <div class="input-group">
+                        {{form.content}}
+                      </div>
+                      {{form.content.errors}}
+                  </div>
+                  <div class="text-center">
+                      <input type="submit" class="btn btn-primary btn-block py-2" value="Enviar">
+                  </div>
+              </form>
+</code></pre>
+
+## Enviar email con MailTrap y la libreria django.core.mail <a name="id10"></a>
+
+1. Registrarse en MailTrap: https://mailtrap.io/register/signup?ref=headerç
+2. Dirigirse a Sandbox - Inboxes y en integrations seleccionar Python Django para copiar y pegar el código en el settings.py
+
+# MAILTRAP SETTINGS
+
+<pre><code>
+EMAIL_HOST = 'smtp.mailtrap.io'
+EMAIL_HOST_USER = 'bae3d650bdc5c8'
+EMAIL_HOST_PASSWORD = '0bf495578848f0'
+EMAIL_PORT = '2525'
+</code></pre>
+
+3. Importar en views.py django.core.mail para importar EmailMessage que para crear la estructura de email.
+EmailMessage sera un objeto con los siguientes campos: asunto, cuerpo, email_origen, email_destino y una lista de adjuntos.
+
+<pre><code>
+# Create your views here.
+def contact(request):
+    contact_form = ContactForm()
+    if request.method == 'POST':
+        contact_form = ContactForm(data = request.POST)
+        if contact_form.is_valid():
+            name = request.POST['name']
+            email = request.POST['email']
+            content = request.POST['content']
+            # Enviar correo con MailTrap y la libreria django.core.mail
+            email = EmailMessage(
+                "La Caffetiera: 'Nuevo mensaje de contacto'" 
+                "De {} <{}>\n\nEscribió:\n\n{}".format(name, email, content), 
+                "no-contestar@inbox.mailtrap.io",
+                ["honopo5717@octovie.com"],
+                reply_to = [email]
+            )
+            try:
+                email.send()
+                return redirect(reverse('contact')+'?ok')
+            except:
+                return redirect(reverse('contact')+'?fail')
+    return render(request, 'contact/contact.html',{'form': contact_form})
+</code></pre>
+
+## Grupos y roles panel de administrador<a name="id11"></a>
+
+1. Ir al admin y añadir un nuevo grupo, por ejemplo que se llame Personalizar
+y marcar los permisos dependiendo de la app que se quieran dar los permisos.
+
+2. Crear un usuario y asignarle el grupo creado. Es importante marcar que sea staff para que pueda ir al panel de administrador.
+3. Pero los roles y grupos nos permiten limitar las acciones a nivel de modelo pero no de sus campos. Es decir, el usuario con el rol creado podrá
+editar cualquier campo del modelo elegido. Para que esto no sea así y para poner un campo en solo lectura para un determinado rol, se tiene que ir al modelo del admin.py y
+definir el método def <b>get_readonly_fields(self, request, object=None)</b> y decir en tiempo de ejecución si ese usuario con este rol tiene permisos 
+para modificar los campos:
+
+<pre><code>
+# Register your models here.
+class LinkAdmin(admin.ModelAdmin):
+    readonly_fields = ('created', 'updated')
+
+    def get_readonly_fields(self, request, object=None):
+        if request.user.groups.filter(name="Personal").exists():
+            return ('key', 'name')
+        else:
+            return ('created', 'updated')
+    
+    def get_exclude(self, request, object=None):
+        return ('key',)
+
+admin.site.register(Link,LinkAdmin)
+</code></pre>
