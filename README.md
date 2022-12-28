@@ -219,7 +219,7 @@ admin:[APP]_[MODELO]_[ACCION] [OBJ.ID]
 <b>EJEMPLO:</b>
 ```html:
 <a> href="{% url 'admin:pages_page_change' page.id %}">Editar </a>
-```python:
+```
 
 ## Ck Editor<a name="id8"></a>
 
