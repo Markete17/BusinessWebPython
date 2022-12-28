@@ -38,7 +38,7 @@ Para cambiar el nombre del campo en el panel de administrador, se usa la propied
 
 Para más campos de <b>admin.ModelAdmin</b>: [Doc Django ModelAdmin](https://docs.djangoproject.com/es/4.0/ref/contrib/admin/#modeladmin-options)
 
-<pre><code>
+```python:
 from django.contrib import admin
 from .models import Post, Category
 
@@ -72,7 +72,7 @@ class PostAdmin(admin.ModelAdmin):
 
 admin.site.register(Category, CategoryAdmin)
 admin.site.register(Post, PostAdmin)
-</code></pre>
+```
 
 
 <h2><b>El panel de administrador quedaría de la siguiente manera: </b></h2>
@@ -84,18 +84,18 @@ admin.site.register(Post, PostAdmin)
 Django permite hacer filtros a la inversa mediante template tag. Por ejemplo, teniendo esta un modelo Post que tiene una relación ManyToMany
 con el modelo Category. Se quiere filtrar los post que tengan X categoría. Teniendo la URL:
 
-<pre><code>
+```python:
 
 urlpatterns = [
     path('', views.blog, name='blog'),
     path('category/<int:category_id>/', views.category, name='category')
 ]
 
-</code></pre>
+```
 
 Donde la vista views.py es:
 
-<pre><code>
+```
 def category(request, category_id):
     category = get_object_or_404(Category, id=category_id)
     
@@ -110,26 +110,26 @@ def category(request, category_id):
     """
     return render(request, 'blog/category.html', {'category': category})
 
-</code></pre>
+```
 
 En vez de pasar los posts filtrados por la categoría a la vista con el método filter y render, se puede hacer de una forma más sencilla en la vista
 con el template tag <b><nombre_del_modelo>_set_all</b> y recorrer el modelo con un FOR.
 
-<pre><code>
+```python:
 {% for post in category.post_set.all%}
 </code></pre>
 
 Para personalizar el nombre por defecto <b>_set.all</b>, es necesario cambiar el modelo añadiendo el parámetro <b>related_name</b>
 
-<pre><code>
+```
 class Post(models.Model):
 	.....
     categories = models.ManyToManyField(Category, verbose_name = 'Categorías', related_name='get_posts')
 </code></pre>
 
-<pre><code>
+```python:
 {% for post in category.get_posts.all%}
-</code></pre>
+```
 
 ## Procesadores de Contexto<a name="id3"></a>
 
@@ -139,11 +139,11 @@ enviar a diferentes vistas.
 2. En este fichero, se va a definir el diccionario a devolver, por ejemplo: 
 
 <b>processors.py</b> 
-<pre><code>
+```python:
 def ctx_dict(request):
     ctx = {'test': 'hola'}
     return ctx
-</code></pre>
+```
 
 3. <b>Ir a settings.py</b> y en la lista context_processors, añadir el método creado:
 
@@ -166,7 +166,7 @@ def ctx_dict(request):
 
 Ejemplo:
 
-<pre><code>
+```python:
 from django import template
 from pages.models import Page
 
@@ -176,19 +176,19 @@ register = template.Library()
 def get_page_list():
     pages = Page.objects.all()
     return pages
-</code></pre>
+```
 
 5. Con esto ahora en cualquier vista se puede insertar la variable creada con una template tag que será el nombre del método. 
 Se tiene que cargar con el template tag <b>{%load [nombre_fichero_creado]%}</b> y a continuación usar la template tag almacenada:
 
 <b>Cabe destacar que se puede renombrar la variable con la palabra as [nombre]</b>
-<pre><code>
+```html:
             {% load pages_extras %}
             {% get_page_list as page_list %}
             {% for page in page_list %}
               a href="{% url 'page' page.id %}" class="link">{{page.title}} /a> {% if not forloop.last %}·{% endif %}
             </p>
-</code></pre>
+```
 
 ## Ordenación<a name="id5"></a>
 
@@ -202,11 +202,11 @@ Por lo tanto, en cualquier vista, al poner {{user}} se mostrará el nombre del u
 
 Entonces, en la vista se puede mostrar el usuario y comprobar si está autenticado, por ejemplo:
 
-<pre><code>
+```html:
       {% if user.is_authenticated %}
       <span {{user}} /span>
       {% endif %}
-</code></pre>
+```
 
 ## URL del panel de administrador en las vistas<a name="id7"></a>
 
@@ -217,11 +217,9 @@ registro del modelo de datos.
 admin:[APP]_[MODELO]_[ACCION] [OBJ.ID]
 
 <b>EJEMPLO:</b>
-<pre><code>
-a> href="{% url 'admin:pages_page_change' page.id %}">Editar /a>
-</code></pre>
-
-<a name="id1"></a>
+```html:
+<a> href="{% url 'admin:pages_page_change' page.id %}">Editar </a>
+```python:
 
 ## Ck Editor<a name="id8"></a>
 
@@ -234,23 +232,23 @@ Por ejemplo, para mejorar los cuadros de texto TextField y sean editables modo W
 6. Para modificar la configuración del CkEditor, se tiene que poner en <b>settings.py</b> una constante llamada CKEDITOR_CONFIGS para establecer la configuración:
 
 Con esta se abre todo lo que se puede hacer con ckeditor
-<pre><code>
+```python:
 CKEDITOR_CONFIGS = {
     'default': {
         'toolbar': None
     }
 }
-</code></pre>
+```
 
 Pero quizás sea mejor incluir un aspecto más sencillo:
 
-<pre><code>
+```python:
 CKEDITOR_CONFIGS = {
     'default': {
         'toolbar': 'Basic'
     }
 }
-</code></pre>
+```
 https://docs.hektorprofe.net/django/web-empresarial/personalizando-panel-administrador-parte-3/
 Más información en: [Link CkEditor Docs](https://github.com/django-ckeditor/django-ckeditor)
 
@@ -259,14 +257,14 @@ Más información en: [Link CkEditor Docs](https://github.com/django-ckeditor/dj
 1. Crear una app contact que va a contener el formulario de contacto.
 2. Crear un fichero <b>forms.py</b> que contenga una clase forms.Form
 
-<pre><code>
+```python:
 from django import forms
 
 class ContactForm(forms.Form):
     name = forms.CharField(label="Nombre", required=True)
     email = forms.EmailField(label="Email", required=True)
     content = forms.CharField(label="Contenido", required=True, widget=forms.Textarea())
-</code></pre>
+```
 
 A diferencia del modelo, forms tiene diferentes campos. Más documentación en
 
@@ -275,11 +273,11 @@ A diferencia del modelo, forms tiene diferentes campos. Más documentación en
 
 3. Insertar el formulario en la vista. En views.py incluir el método que renderizará y mandará el formulario a la vista:
 
-<pre><code>
+```python:
 def contact(request):
     contact_form = ContactForm()
     return render(request, 'contact/contact.html',{'form': contact_form})
-</code></pre>
+```
 
 4. Añadir el form a la vista
 
@@ -290,7 +288,7 @@ Django no pone por defecto el botón de enviar, es necesario también añadirlo.
 Falsificación de información en sitios cruzados. Es decir, este token lo que hace es protegernos ante falisificación de solicitudes desde otros sitios.
 Permite que nuestra app se asegure que el origen de las peticiones vengan desde nuestro dominio y no desde otras páginas maliciosas.
 
-<pre><code>
+```html:
               <!-- Formulario de contacto -->
               <form action='' method='POST'>
               <table>
@@ -300,7 +298,7 @@ Permite que nuestra app se asegure que el origen de las peticiones vengan desde 
               <input type="submit" value="Enviar"/>
               </form>
               <!-- Fin formulario de contacto -->
-</code></pre>
+```
 
 6. Implementar la vista.
 
@@ -311,7 +309,7 @@ Con el método <b>form.isvalid()</b> se puede comprobar si los datos enviados so
 El método <b>request.POST</b> es un diccionario con todos los datos del formulario enviados.
 Con <b>reverse</b> lo que permite es detectar la URL que tiene el name en las urls.py. Esto es por si cambia en algún momento la URL, para hacerlo dinámico.
 
-<pre><code>
+```python:
 def contact(request):
     contact_form = ContactForm()
     if request.method == 'POST':
@@ -323,7 +321,7 @@ def contact(request):
             return redirect(reverse('contact')+'?ok')
     return render(request, 'contact/contact.html',{'form': contact_form})
 	
-</code></pre>
+```
 
 7. Recibir el ok en el template.
 Si todo es correcto, se redireccionará a la URL de 'contact' y en el diccionario de request.GET se almacenará la query OK.
@@ -340,7 +338,7 @@ En vez de hacer que django genere automáticamente el formulario, hacerlo nosotr
 en forms.py y agregar el parámetro <b>widget</b>. A este widget hay que pasarle de la biblioteca forms el forms.TextInput y dentro unos atributos que
 son los atributos que se pueden poner en los HTML como class, placeholder, rows, cols, value, etc.
 
-<pre><code>
+```html:
 class ContactForm(forms.Form):
     name = forms.CharField(label="Nombre", required=True, widget=forms.TextInput(
         attrs={'class': 'form-control', 'placeholder': 'Escribe tu nombre'}
@@ -351,11 +349,11 @@ class ContactForm(forms.Form):
     content = forms.CharField(label="Contenido", required=True, widget=forms.Textarea(
         attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Escribe tu mensaje'}
     ), min_length=3, max_length=1000)
-</code></pre>
+```
 
 3. Entonces la vista quedaría de la siguiente forma añadiendo también {{form.name.errors}}
 
-<pre><code>
+```html:
 <form method='POST' action=''>
                   {% csrf_token %}
                   <div class="form-group">
@@ -387,7 +385,7 @@ class ContactForm(forms.Form):
                       <input type="submit" class="btn btn-primary btn-block py-2" value="Enviar">
                   </div>
               </form>
-</code></pre>
+```
 
 ## Enviar email con MailTrap y la libreria django.core.mail <a name="id10"></a>
 
@@ -396,17 +394,17 @@ class ContactForm(forms.Form):
 
 # MAILTRAP SETTINGS
 
-<pre><code>
+```python:
 EMAIL_HOST = 'smtp.mailtrap.io'
 EMAIL_HOST_USER = 'bae3d650bdc5c8'
 EMAIL_HOST_PASSWORD = '0bf495578848f0'
 EMAIL_PORT = '2525'
-</code></pre>
+```
 
 3. Importar en views.py django.core.mail para importar EmailMessage que para crear la estructura de email.
 EmailMessage sera un objeto con los siguientes campos: asunto, cuerpo, email_origen, email_destino y una lista de adjuntos.
 
-<pre><code>
+```python:
 # Create your views here.
 def contact(request):
     contact_form = ContactForm()
@@ -430,7 +428,7 @@ def contact(request):
             except:
                 return redirect(reverse('contact')+'?fail')
     return render(request, 'contact/contact.html',{'form': contact_form})
-</code></pre>
+```
 
 ## Grupos y roles panel de administrador<a name="id11"></a>
 
@@ -443,7 +441,7 @@ editar cualquier campo del modelo elegido. Para que esto no sea así y para pone
 definir el método def <b>get_readonly_fields(self, request, object=None)</b> y decir en tiempo de ejecución si ese usuario con este rol tiene permisos 
 para modificar los campos:
 
-<pre><code>
+```python:
 # Register your models here.
 class LinkAdmin(admin.ModelAdmin):
     readonly_fields = ('created', 'updated')
@@ -458,4 +456,4 @@ class LinkAdmin(admin.ModelAdmin):
         return ('key',)
 
 admin.site.register(Link,LinkAdmin)
-</code></pre>
+```
