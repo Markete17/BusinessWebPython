@@ -38,7 +38,7 @@ Para cambiar el nombre del campo en el panel de administrador, se usa la propied
 
 Para más campos de <b>admin.ModelAdmin</b>: [Doc Django ModelAdmin](https://docs.djangoproject.com/es/4.0/ref/contrib/admin/#modeladmin-options)
 
-```python:
+```python
 from django.contrib import admin
 from .models import Post, Category
 
@@ -84,7 +84,7 @@ admin.site.register(Post, PostAdmin)
 Django permite hacer filtros a la inversa mediante template tag. Por ejemplo, teniendo esta un modelo Post que tiene una relación ManyToMany
 con el modelo Category. Se quiere filtrar los post que tengan X categoría. Teniendo la URL:
 
-```python:
+```python
 
 urlpatterns = [
     path('', views.blog, name='blog'),
@@ -115,7 +115,7 @@ def category(request, category_id):
 En vez de pasar los posts filtrados por la categoría a la vista con el método filter y render, se puede hacer de una forma más sencilla en la vista
 con el template tag <b><nombre_del_modelo>_set_all</b> y recorrer el modelo con un FOR.
 
-```python:
+```python
 {% for post in category.post_set.all%}
 </code></pre>
 
@@ -127,7 +127,7 @@ class Post(models.Model):
     categories = models.ManyToManyField(Category, verbose_name = 'Categorías', related_name='get_posts')
 </code></pre>
 
-```python:
+```python
 {% for post in category.get_posts.all%}
 ```
 
@@ -139,7 +139,7 @@ enviar a diferentes vistas.
 2. En este fichero, se va a definir el diccionario a devolver, por ejemplo: 
 
 <b>processors.py</b> 
-```python:
+```python
 def ctx_dict(request):
     ctx = {'test': 'hola'}
     return ctx
@@ -166,7 +166,7 @@ def ctx_dict(request):
 
 Ejemplo:
 
-```python:
+```python
 from django import template
 from pages.models import Page
 
@@ -182,7 +182,7 @@ def get_page_list():
 Se tiene que cargar con el template tag <b>{%load [nombre_fichero_creado]%}</b> y a continuación usar la template tag almacenada:
 
 <b>Cabe destacar que se puede renombrar la variable con la palabra as [nombre]</b>
-```html:
+```html
             {% load pages_extras %}
             {% get_page_list as page_list %}
             {% for page in page_list %}
@@ -202,7 +202,7 @@ Por lo tanto, en cualquier vista, al poner {{user}} se mostrará el nombre del u
 
 Entonces, en la vista se puede mostrar el usuario y comprobar si está autenticado, por ejemplo:
 
-```html:
+```html
       {% if user.is_authenticated %}
       <span {{user}} /span>
       {% endif %}
@@ -217,7 +217,7 @@ registro del modelo de datos.
 admin:[APP]_[MODELO]_[ACCION] [OBJ.ID]
 
 <b>EJEMPLO:</b>
-```html:
+```html
 <a> href="{% url 'admin:pages_page_change' page.id %}">Editar </a>
 ```
 
@@ -232,7 +232,7 @@ Por ejemplo, para mejorar los cuadros de texto TextField y sean editables modo W
 6. Para modificar la configuración del CkEditor, se tiene que poner en <b>settings.py</b> una constante llamada CKEDITOR_CONFIGS para establecer la configuración:
 
 Con esta se abre todo lo que se puede hacer con ckeditor
-```python:
+```python
 CKEDITOR_CONFIGS = {
     'default': {
         'toolbar': None
@@ -242,7 +242,7 @@ CKEDITOR_CONFIGS = {
 
 Pero quizás sea mejor incluir un aspecto más sencillo:
 
-```python:
+```python
 CKEDITOR_CONFIGS = {
     'default': {
         'toolbar': 'Basic'
@@ -257,7 +257,7 @@ Más información en: [Link CkEditor Docs](https://github.com/django-ckeditor/dj
 1. Crear una app contact que va a contener el formulario de contacto.
 2. Crear un fichero <b>forms.py</b> que contenga una clase forms.Form
 
-```python:
+```python
 from django import forms
 
 class ContactForm(forms.Form):
@@ -273,7 +273,7 @@ A diferencia del modelo, forms tiene diferentes campos. Más documentación en
 
 3. Insertar el formulario en la vista. En views.py incluir el método que renderizará y mandará el formulario a la vista:
 
-```python:
+```python
 def contact(request):
     contact_form = ContactForm()
     return render(request, 'contact/contact.html',{'form': contact_form})
@@ -288,7 +288,7 @@ Django no pone por defecto el botón de enviar, es necesario también añadirlo.
 Falsificación de información en sitios cruzados. Es decir, este token lo que hace es protegernos ante falisificación de solicitudes desde otros sitios.
 Permite que nuestra app se asegure que el origen de las peticiones vengan desde nuestro dominio y no desde otras páginas maliciosas.
 
-```html:
+```html
               <!-- Formulario de contacto -->
               <form action='' method='POST'>
               <table>
@@ -309,7 +309,7 @@ Con el método <b>form.isvalid()</b> se puede comprobar si los datos enviados so
 El método <b>request.POST</b> es un diccionario con todos los datos del formulario enviados.
 Con <b>reverse</b> lo que permite es detectar la URL que tiene el name en las urls.py. Esto es por si cambia en algún momento la URL, para hacerlo dinámico.
 
-```python:
+```python
 def contact(request):
     contact_form = ContactForm()
     if request.method == 'POST':
@@ -338,7 +338,7 @@ En vez de hacer que django genere automáticamente el formulario, hacerlo nosotr
 en forms.py y agregar el parámetro <b>widget</b>. A este widget hay que pasarle de la biblioteca forms el forms.TextInput y dentro unos atributos que
 son los atributos que se pueden poner en los HTML como class, placeholder, rows, cols, value, etc.
 
-```html:
+```html
 class ContactForm(forms.Form):
     name = forms.CharField(label="Nombre", required=True, widget=forms.TextInput(
         attrs={'class': 'form-control', 'placeholder': 'Escribe tu nombre'}
@@ -353,7 +353,7 @@ class ContactForm(forms.Form):
 
 3. Entonces la vista quedaría de la siguiente forma añadiendo también {{form.name.errors}}
 
-```html:
+```html
 <form method='POST' action=''>
                   {% csrf_token %}
                   <div class="form-group">
@@ -394,7 +394,7 @@ class ContactForm(forms.Form):
 
 # MAILTRAP SETTINGS
 
-```python:
+```python
 EMAIL_HOST = 'smtp.mailtrap.io'
 EMAIL_HOST_USER = 'bae3d650bdc5c8'
 EMAIL_HOST_PASSWORD = '0bf495578848f0'
@@ -404,7 +404,7 @@ EMAIL_PORT = '2525'
 3. Importar en views.py django.core.mail para importar EmailMessage que para crear la estructura de email.
 EmailMessage sera un objeto con los siguientes campos: asunto, cuerpo, email_origen, email_destino y una lista de adjuntos.
 
-```python:
+```python
 # Create your views here.
 def contact(request):
     contact_form = ContactForm()
@@ -441,7 +441,7 @@ editar cualquier campo del modelo elegido. Para que esto no sea así y para pone
 definir el método def <b>get_readonly_fields(self, request, object=None)</b> y decir en tiempo de ejecución si ese usuario con este rol tiene permisos 
 para modificar los campos:
 
-```python:
+```python
 # Register your models here.
 class LinkAdmin(admin.ModelAdmin):
     readonly_fields = ('created', 'updated')
