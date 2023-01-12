@@ -117,7 +117,7 @@ con el template tag <b><nombre_del_modelo>_set_all</b> y recorrer el modelo con 
 
 ```python
 {% for post in category.post_set.all%}
-</code></pre>
+
 
 Para personalizar el nombre por defecto <b>_set.all</b>, es necesario cambiar el modelo añadiendo el parámetro <b>related_name</b>
 
@@ -125,7 +125,6 @@ Para personalizar el nombre por defecto <b>_set.all</b>, es necesario cambiar el
 class Post(models.Model):
 	.....
     categories = models.ManyToManyField(Category, verbose_name = 'Categorías', related_name='get_posts')
-</code></pre>
 
 ```python
 {% for post in category.get_posts.all%}
@@ -153,7 +152,6 @@ def ctx_dict(request):
 				.....
                 'social.processors.ctx_dict'
             ],
-</code></pre>
 
 4. Ya está, ahora la variable <b>test</b> definida en el método <b>ctx_dict()</b> se puede utilizar en todas las vistas html.
 
