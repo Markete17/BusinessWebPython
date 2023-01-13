@@ -393,6 +393,7 @@ class ContactForm(forms.Form):
 # MAILTRAP SETTINGS
 
 ```python
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.mailtrap.io'
 EMAIL_HOST_USER = 'bae3d650bdc5c8'
 EMAIL_HOST_PASSWORD = '0bf495578848f0'
@@ -416,7 +417,7 @@ def contact(request):
             email = EmailMessage(
                 "La Caffetiera: 'Nuevo mensaje de contacto'" 
                 "De {} <{}>\n\nEscribió:\n\n{}".format(name, email, content), 
-                "no-contestar@inbox.mailtrap.io",
+                "settings.EMAIL_HOST_USER",
                 ["honopo5717@octovie.com"],
                 reply_to = [email]
             )
